@@ -14,12 +14,11 @@ services:
       DJANGO_SETTINGS_MODULE: cinema.settings
       # CORS pour le front en dev
       CORS_ALLOWED_ORIGINS: "http://localhost:5173,http://127.0.0.1:5173"
-    # healthcheck plus tard si on veut
-    # healthcheck:
-    #   test: ["CMD-SHELL", "curl -fsS http://localhost:8000/health || exit 1"]
-    #   interval: 10s
-    #   timeout: 2s
-    #   retries: 3
+    healthcheck:
+      test: ["CMD-SHELL", "python - <<'PY'\nimport sys, urllib.request\ntry:\n  r = urllib.request.urlopen('http://localhost:8000/api/health/', timeout=2)\n  sys.exit(0 if r.status == 200 else 1)\nexcept Exception:\n  sys.exit(1)\nPY"]
+      interval: 10s
+      timeout: 2s
+      retries: 3
 
   frontend:
     build:
