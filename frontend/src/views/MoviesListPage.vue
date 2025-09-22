@@ -4,27 +4,29 @@ import { useMoviesStore } from '@/stores/movies'
 
 const store = useMoviesStore()
 
-// Charger la première page au montage
 onMounted(() => {
   store.fetchMovies(1)
 })
 
-// Recharger quand on change de page
 watch(() => store.page, (p) => {
   if (p) store.fetchMovies(p)
 })
 </script>
 
 <template>
-  <v-container class="pa-6">
-    <div class="text-h5 mb-4">Movies (page {{ store.page }}/{{ store.totalPages }})</div>
+  <!-- fill-height pour prendre toute la hauteur, flex column -->
+  <v-container class="pa-6 d-flex flex-column fill-height">
+    <!-- Header -->
+    <div class="text-h5 mb-4">
+      Movies (page {{ store.page }} / {{ store.totalPages }})
+    </div>
 
-    <!-- Affichage erreur -->
+    <!-- Alert erreur -->
     <v-alert v-if="store.hasError" type="error" variant="tonal" class="mb-4">
       {{ store.error }}
     </v-alert>
 
-    <!-- Spinner de chargement -->
+    <!-- Loader -->
     <v-progress-linear
       v-if="store.loading"
       indeterminate
@@ -37,7 +39,9 @@ watch(() => store.page, (p) => {
       <v-col
         v-for="m in store.items"
         :key="m.id"
-        cols="12" sm="6" md="4"
+        cols="12"
+        sm="6"
+        md="4"
       >
         <v-card>
           <v-card-title>{{ m.title }}</v-card-title>
@@ -54,11 +58,21 @@ watch(() => store.page, (p) => {
       </v-col>
     </v-row>
 
-    <!-- Pagination -->
-    <div class="d-flex justify-center mt-4">
+    <!-- Spacer pousse le footer en bas -->
+    <v-spacer />
+
+    <!-- Footer pagination -->
+    <div class="d-flex justify-space-between align-center mt-4">
+      <div class="text-caption">
+        Total: {{ store.count }} films — page {{ store.page }} / {{ store.totalPages }}
+      </div>
+
       <v-pagination
+        v-if="store.totalPages > 1"
         v-model="store.page"
         :length="store.totalPages"
+        :total-visible="7"
+        density="comfortable"
         color="primary"
       />
     </div>
