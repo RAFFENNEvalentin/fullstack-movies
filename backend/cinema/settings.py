@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'movies',
+    'drf_spectacular',
 ]
 
 MIDDLEWARE = [
@@ -135,3 +136,15 @@ CORS_ALLOWED_ORIGINS = [o for o in _cors.split(",") if o.strip()]
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+REST_FRAMEWORK = {
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 5,
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",  # <— bien ici
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Movies API",
+    "DESCRIPTION": "Simple API for movies, actors and reviews (test).",
+    "VERSION": "1.0.0",
+}
