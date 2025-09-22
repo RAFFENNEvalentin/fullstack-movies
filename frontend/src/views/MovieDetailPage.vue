@@ -75,32 +75,35 @@ async function handleSave() {
     />
 
     <template v-if="store.selected">
-      <v-card class="mb-4">
-        <MovieHeader
-          :title="store.selected.title"
-          :average="store.selected.average_grade"
-        />
-
-        <v-card-text>
-          <ActorsSelect
-            v-model="actorIds"
-            :items="actorsStore.selectItems"
-            class="mb-4"
+      <!-- Wrapper centré avec largeur contrôlée -->
+      <div class="mx-auto" style="max-width: 1100px; width: 100%;">
+        <v-card class="pa-8 mb-8" elevation="3" rounded="lg">
+          <MovieHeader
+            :title="store.selected.title"
+            :average="store.selected.average_grade"
           />
 
-          <DescriptionEditor
-            v-model="newDescription"
-            :loading="saving"
-            @save="handleSave"
-          />
-        </v-card-text>
+          <v-card-text>
+            <ActorsSelect
+              v-model="actorIds"
+              :items="actorsStore.selectItems"
+              class="mb-6"
+            />
 
-        <v-card-actions class="justify-end">
-          <v-btn color="secondary" variant="tonal" @click="reviewDialog = true">
-            Ajouter une note
-          </v-btn>
-        </v-card-actions>
-      </v-card>
+            <DescriptionEditor
+              v-model="newDescription"
+              :loading="saving"
+              @save="handleSave"
+            />
+          </v-card-text>
+
+          <v-card-actions class="justify-end">
+            <v-btn color="secondary" variant="tonal" @click="reviewDialog = true">
+              Ajouter une note
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </div>
     </template>
 
     <v-spacer />
