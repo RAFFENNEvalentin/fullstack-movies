@@ -38,7 +38,7 @@ class MovieViewSet(viewsets.ModelViewSet):
                 Prefetch("actors", queryset=Actor.objects.only("id", "first_name", "last_name"))
             )
             .annotate(average_grade=Avg("reviews__grade"))
-            .order_by("id")
+            .order_by("-id")
         )
 
     @action(detail=True, methods=["post"], url_path="reviews")
