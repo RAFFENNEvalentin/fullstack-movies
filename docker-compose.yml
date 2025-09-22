@@ -1,0 +1,40 @@
+services:
+  backend:
+    build:
+      context: ./backend
+    container_name: movies-backend
+    #command: python manage.py runserver 0.0.0.0:8000
+    command: sh -c "tail -f /dev/null"
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    env_file:
+      - .env
+    environment:
+      DJANGO_SETTINGS_MODULE: cinema.settings
+      # CORS pour le front en dev
+      CORS_ALLOWED_ORIGINS: "http://localhost:5173,http://127.0.0.1:5173"
+    # healthcheck plus tard si on veut
+    # healthcheck:
+    #   test: ["CMD-SHELL", "curl -fsS http://localhost:8000/health || exit 1"]
+    #   interval: 10s
+    #   timeout: 2s
+    #   retries: 3
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: movies-frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    stdin_open: true
+    tty: true
+    environment:
+      # baseURL axios (on lira cette var côté front)
+      VITE_API_BASE_URL: "http://localhost:8000/api"
+    depends_on:
+      - backend
