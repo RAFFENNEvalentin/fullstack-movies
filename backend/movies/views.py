@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework import viewsets, status
 from django.db.models import Avg, Prefetch
 
-from .serializers import HealthSerializer, MovieSerializer, ReviewSerializer
+from .serializers import HealthSerializer, MovieSerializer, ReviewSerializer, ActorSerializer
 from .models import Movie, Actor, Review
 
 
@@ -49,3 +49,9 @@ class MovieViewSet(viewsets.ModelViewSet):
         ser.is_valid(raise_exception=True)
         Review.objects.create(movie=movie, grade=ser.validated_data["grade"])
         return Response({"status": "created"}, status=status.HTTP_201_CREATED)
+    
+
+class ActorViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Actor.objects.all().order_by("last_name", "first_name")
+    serializer_class = ActorSerializer
+    pagination_class = None
