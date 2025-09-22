@@ -3,8 +3,7 @@ services:
     build:
       context: ./backend
     container_name: movies-backend
-    #command: python manage.py runserver 0.0.0.0:8000
-    command: sh -c "tail -f /dev/null"
+    command: python manage.py runserver 0.0.0.0:8000
     ports:
       - "8000:8000"
     volumes:
