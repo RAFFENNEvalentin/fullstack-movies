@@ -54,3 +54,4 @@ class MovieViewSet(viewsets.ModelViewSet):
 class ActorViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Actor.objects.all().order_by("last_name", "first_name")
     serializer_class = ActorSerializer
+    pagination_class = None
