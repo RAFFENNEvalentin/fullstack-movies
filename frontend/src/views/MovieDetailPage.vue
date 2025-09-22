@@ -2,11 +2,11 @@
 import { onMounted, watch, ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useMoviesStore } from '@/stores/movies'
-import { useActorsStore } from '@/stores/actors'   // NEW
+import { useActorsStore } from '@/stores/actors'
 
 const route = useRoute()
 const store = useMoviesStore()
-const actorsStore = useActorsStore()               // NEW
+const actorsStore = useActorsStore()
 
 const id = computed(() => Number(route.params.id))
 
@@ -14,23 +14,32 @@ const reviewDialog = ref(false)
 const reviewGrade = ref(5)
 const saving = ref(false)
 const newDescription = ref('')
-const actorIds = ref([])                           // NEW
+const actorIds = ref([])
+
+// NEW — snackbar
+const snackbar = ref(false)          // NEW
+const snackbarText = ref('')         // NEW
 
 async function load() {
   await Promise.all([
-    actorsStore.items.length ? Promise.resolve() : actorsStore.fetchActors(), // NEW
+    actorsStore.items.length ? Promise.resolve() : actorsStore.fetchActors(),
     store.fetchMovie(id.value),
   ])
   newDescription.value = store.selected?.description || ''
-  actorIds.value = (store.selected?.actors || []).map(a => a.id)             // NEW
+  actorIds.value = (store.selected?.actors || []).map(a => a.id)
 }
 
 onMounted(load)
 watch(() => route.params.id, load)
 
 async function submitReview() {
-  try { await store.addReview(id.value, Number(reviewGrade.value)) }
-  catch (_) {}
+  try {
+    await store.addReview(id.value, Number(reviewGrade.value))
+    snackbarText.value = 'Note ajoutée ✅'   // NEW
+    snackbar.value = true                   // NEW
+  } catch (_) {
+    // l’alert d’erreur globale s’affiche déjà via store.error
+  }
   reviewDialog.value = false
 }
 
@@ -39,8 +48,10 @@ async function saveDescription() {
   try {
     await store.updateMovie(id.value, {
       description: newDescription.value,
-      actor_ids: actorIds.value                       // NEW
+      actor_ids: actorIds.value
     })
+    snackbarText.value = 'Enregistré ✅'     // NEW
+    snackbar.value = true                    // NEW
   } finally {
     saving.value = false
   }
@@ -49,7 +60,19 @@ async function saveDescription() {
 
 <template>
   <v-container class="pa-6 d-flex flex-column fill-height">
-    <!-- ... header / alerts / loader identiques ... -->
+    <div class="d-flex align-center mb-4">
+      <v-btn to="/movies" variant="text" prepend-icon="mdi-arrow-left">Retour</v-btn>
+      <div class="text-h5 ml-2">Détail du film</div>
+    </div>
+
+    <v-alert v-if="store.hasError || actorsStore.error" type="error" variant="tonal" class="mb-4">
+      {{ store.error || actorsStore.error }}
+    </v-alert>
+
+    <v-progress-linear
+      v-if="store.loading || actorsStore.loading"
+      indeterminate color="primary" class="mb-4"
+    />
 
     <template v-if="store.selected">
       <v-card class="mb-4">
@@ -63,7 +86,6 @@ async function saveDescription() {
         <v-card-text>
           <div class="mb-2 text-subtitle-2">Acteurs</div>
 
-          <!-- Multiselect avec items préformatés depuis le store -->
           <v-autocomplete
             v-model="actorIds"
             :items="actorsStore.selectItems"
@@ -102,6 +124,26 @@ async function saveDescription() {
 
     <div class="text-caption text-medium-emphasis">App Movies — détail</div>
 
-    <!-- Dialog note inchangé -->
+    <!-- NEW — Snackbar -->
+    <v-snackbar v-model="snackbar" timeout="2200" location="bottom end">
+      {{ snackbarText }}
+    </v-snackbar>
+
+    <!-- Dialog note -->
+    <v-dialog v-model="reviewDialog" max-width="400">
+      <v-card>
+        <v-card-title>Ajouter une note</v-card-title>
+        <v-card-text>
+          <v-select label="Note" :items="[1,2,3,4,5]" v-model="reviewGrade" variant="outlined" />
+          <div class="text-caption text-medium-emphasis mt-2">
+            La note doit être entre 1 et 5 (validée côté serveur).
+          </div>
+        </v-card-text>
+        <v-card-actions class="justify-end">
+          <v-btn variant="text" @click="reviewDialog = false">Annuler</v-btn>
+          <v-btn color="primary" @click="submitReview">Valider</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
